@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+import py.path
 from pytest import fixture, raises
 
 
@@ -31,11 +32,9 @@ def test_sftp_session(server):
 @fixture(params=[("chmod", "/", 0o755),
                  ("chown", "/", 0, 0),
                  ("lstat", "/"),
-                 ("mkdir", "/tmp/foo"),
                  ("readlink", "/etc"),
                  ("remove", "/etc/passwd"),
                  ("rename", "/tmp/foo", "/tmp/bar"),
-                 ("rmdir", "/"),
                  ("symlink", "/tmp/foo", "/tmp/bar"),
                  ("truncate", "/etc/passwd", 0),
                  ("unlink", "/etc/passwd"),
@@ -62,3 +61,36 @@ def test_sftp_list_files(server, client):
         fh.write('dummy-content')
 
     assert sftp.listdir('.') == ['dummy.txt']
+
+
+def test_sftp_open_file(server, client):
+    root_path = py.path.local(server.root)
+    root_path.join('file.txt').write('content')
+
+    sftp = client.open_sftp()
+    assert sftp.listdir('.') == ['file.txt']
+
+    data = sftp.open('file.txt', 'r')
+    assert data.read() == b'content'
+
+
+def test_sftp_mkdir(server, client):
+    root_path = py.path.local(server.root)
+
+    sftp = client.open_sftp()
+    assert sftp.listdir('.') == []
+    sftp.mkdir('the-dir')
+    assert sftp.listdir('.') == ['the-dir']
+
+    root_path.listdir() == ['the-dir']
+
+
+def test_sftp_rmdir(server, client):
+    root_path = py.path.local(server.root)
+    root_path.join('the-dir').mkdir()
+
+    sftp = client.open_sftp()
+    assert sftp.listdir('.') == ['the-dir']
+
+    sftp.rmdir('the-dir')
+    assert sftp.listdir('.') == []

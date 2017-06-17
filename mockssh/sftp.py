@@ -57,6 +57,12 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
         return os.path.realpath(
             os.path.join(self._root, os.path.normpath(path)))
 
+    def session_started(self):
+        pass
+
+    def session_ended(self):
+        pass
+
     @returns_sftp_error
     def list_folder(self, path):
         path = self._path_join(path)
@@ -68,11 +74,17 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
             result.append(item)
         return result
 
-    def session_started(self):
-        pass
+    @returns_sftp_error
+    def mkdir(self, path, attr):
+        path = self._path_join(path)
+        os.mkdir(path)
+        return paramiko.SFTP_OK
 
-    def session_ended(self):
-        pass
+    @returns_sftp_error
+    def rmdir(self, path):
+        path = self._path_join(path)
+        os.rmdir(path)
+        return paramiko.SFTP_OK
 
     @returns_sftp_error
     def open(self, path, flags, attr):
