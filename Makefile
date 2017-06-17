@@ -2,13 +2,13 @@
 
 
 install:
-	pip install -r requirements-devel.txt
+	pip install -e .[test]
 
 test:
 	py.test
 
 coverage:
-	py.test --cov=mockssh --cov-report=term-missing
+	py.test --cov=mocksftp --cov-report=term-missing -p no:mocksftp
 
 lint:
-	flake8 mockssh/
+	flake8 src/ tests/

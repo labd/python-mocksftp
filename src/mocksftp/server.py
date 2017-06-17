@@ -1,5 +1,4 @@
 import logging
-import os
 import select
 import socket
 import threading
@@ -8,7 +7,7 @@ from contextlib import contextmanager
 
 import paramiko
 
-from mockssh import sftp
+from mocksftp import interface, keys
 
 try:
     from queue import Queue
@@ -19,9 +18,6 @@ except ImportError:
 __all__ = [
     'Server',
 ]
-
-
-SERVER_KEY_PATH = os.path.join(os.path.dirname(__file__), "server-key")
 
 
 class Handler(paramiko.ServerInterface):
@@ -130,12 +126,12 @@ class Server(object):
         server = Handler(self)
 
         transport = paramiko.Transport(conn)
-        transport.add_server_key(paramiko.RSAKey(filename=SERVER_KEY_PATH))
+        transport.add_server_key(paramiko.RSAKey(filename=keys.SERVER_PRIVATE_KEY))
         transport.set_subsystem_handler(
             'sftp',
             paramiko.SFTPServer,
             root=self._root,
-            sftp_si=sftp.SFTPServerInterface)
+            sftp_si=interface.SFTPServerInterface)
 
         transport.start_server(server=server)
         with self._lock:
@@ -146,7 +142,7 @@ class Server(object):
         private_key_path, _ = self._users[uid]
         client = paramiko.SSHClient()
 
-        key = paramiko.RSAKey.from_private_key_file(SERVER_KEY_PATH)
+        key = paramiko.RSAKey.from_private_key_file(keys.SERVER_PRIVATE_KEY)
         host_keys = client.get_host_keys()
         host_keys.add(self.host, "ssh-rsa", key)
         host_keys.add("[%s]:%d" % (self.host, self.port), "ssh-rsa", key)

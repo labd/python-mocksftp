@@ -1,54 +1,17 @@
-mock-ssh-server - An SSH server for testing purposes
-====================================================
+mocksftp - Easily test your sftp client code 
+============================================
 
-``mock-ssh-server`` packs a Python context manager that implements an SSH
-server for testing purposes. It is built on top of `paramiko`_, so it does
-not need OpenSSH binaries to be installed.
+In-process SFTP server for testing your SFTP related client code. 
 
 
-Sample usage
-------------
+History
+=======
 
-As a `py.test`_ fixture::
-
-    import os
-
-    from pytest import yield_fixture
-
-    import mockssh
+This project was started as a fork of https://github.com/carletes/mock-ssh-server
+The SSH related code was removed to focus solely on the SFTP protocol.
 
 
-    @yield_fixture()
-    def server():
-        users = {
-            'sample-user': {
-                'key': '/path/to/user-private-key',
-                'passphrase': None,
-            }
-        }
-        with mockssh.Server(users) as s:
-            yield s
-
-
-    def test_ssh_session(server):
-        for uid in server.users:
-            with server.client(uid) as c:
-                _, stdout, _ = c.exec_command("ls /")
-                assert stdout.read()
-
-    def test_sftp_session(server):
-        for uid in server.users:
-            target_dir = tempfile.mkdtemp()
-            target_fname = os.path.join(target_dir, "foo")
-            assert not os.access(target_fname, os.F_OK)
-
-            with server.client(uid) as c:
-                sftp = c.open_sftp()
-                sftp.put(__file__, target_fname, confirm=True)
-                assert os.access(target_fname, os.F_OK)
-
-
-.. _paramiko: http://www.paramiko.org/
-.. _py.test:  http://pytest.org/latest/
-.. image:: https://travis-ci.org/carletes/mock-ssh-server.svg
-	   :target: https://travis-ci.org/carletes/mock-ssh-server
+Alternatives
+============
+ - https://github.com/ulope/pytest-sftpserver 
+ - https://github.com/rspivak/sftpserver

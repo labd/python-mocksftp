@@ -4,7 +4,7 @@ import os
 import paramiko
 from paramiko import SFTPAttributes
 
-from mockssh.decorators import returns_sftp_error
+from mocksftp.decorators import returns_sftp_error
 
 __all__ = [
     'SFTPServerInterface',

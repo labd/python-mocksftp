@@ -1,7 +1,7 @@
-import time
 import os
 import tempfile
 import threading
+import time
 
 import py.path
 from pytest import fixture, raises
@@ -14,9 +14,9 @@ def files_equal(fname1, fname2):
                 return True
 
 
-def test_sftp_concurrent_connections(assert_num_threads, server):
+def test_sftp_concurrent_connections(assert_num_threads, sftp_server):
     def connect():
-        with server.client('sample-user') as client:
+        with sftp_server.client('sample-user') as client:
             sftp = client.open_sftp()
             for i in range(0, 3):
                 assert sftp.listdir() == []
@@ -39,13 +39,13 @@ def test_sftp_concurrent_connections(assert_num_threads, server):
     time.sleep(0.1)
 
 
-def test_sftp_session(server):
-    for uid in server.users:
+def test_sftp_session(sftp_server):
+    for uid in sftp_server.users:
         target_dir = tempfile.mkdtemp()
         target_fname = os.path.join(target_dir, "foo")
         assert not os.access(target_fname, os.F_OK)
 
-        with server.client(uid) as c:
+        with sftp_server.client(uid) as c:
             sftp = c.open_sftp()
             sftp.put(__file__, target_fname, confirm=True)
             assert files_equal(target_fname, __file__)
@@ -70,9 +70,9 @@ def unsupported_call(request):
     return request.param
 
 
-def test_sftp_unsupported_calls(server, unsupported_call):
-    for uid in server.users:
-        with server.client(uid) as c:
+def test_sftp_unsupported_calls(sftp_server, unsupported_call):
+    for uid in sftp_server.users:
+        with sftp_server.client(uid) as c:
             meth, args = unsupported_call[0], unsupported_call[1:]
             sftp = c.open_sftp()
             with raises(IOError) as exc:
@@ -80,31 +80,31 @@ def test_sftp_unsupported_calls(server, unsupported_call):
             assert str(exc.value) == "Operation unsupported"
 
 
-def test_sftp_list_files(server, client):
-    sftp = client.open_sftp()
+def test_sftp_list_files(sftp_server, sftp_client):
+    sftp = sftp_client.open_sftp()
     assert sftp.listdir('.') == []
 
-    with open(os.path.join(server.root, 'dummy.txt'), 'w') as fh:
+    with open(os.path.join(sftp_server.root, 'dummy.txt'), 'w') as fh:
         fh.write('dummy-content')
 
     assert sftp.listdir('.') == ['dummy.txt']
 
 
-def test_sftp_open_file(server, client):
-    root_path = py.path.local(server.root)
+def test_sftp_open_file(sftp_server, sftp_client):
+    root_path = py.path.local(sftp_server.root)
     root_path.join('file.txt').write('content')
 
-    sftp = client.open_sftp()
+    sftp = sftp_client.open_sftp()
     assert sftp.listdir('.') == ['file.txt']
 
     data = sftp.open('file.txt', 'r')
     assert data.read() == b'content'
 
 
-def test_sftp_mkdir(server, client):
-    root_path = py.path.local(server.root)
+def test_sftp_mkdir(sftp_server, sftp_client):
+    root_path = py.path.local(sftp_server.root)
 
-    sftp = client.open_sftp()
+    sftp = sftp_client.open_sftp()
     assert sftp.listdir('.') == []
     sftp.mkdir('the-dir')
     assert sftp.listdir('.') == ['the-dir']
@@ -112,11 +112,11 @@ def test_sftp_mkdir(server, client):
     root_path.listdir() == ['the-dir']
 
 
-def test_sftp_rmdir(server, client):
-    root_path = py.path.local(server.root)
+def test_sftp_rmdir(sftp_server, sftp_client):
+    root_path = py.path.local(sftp_server.root)
     root_path.join('the-dir').mkdir()
 
-    sftp = client.open_sftp()
+    sftp = sftp_client.open_sftp()
     assert sftp.listdir('.') == ['the-dir']
 
     sftp.rmdir('the-dir')
