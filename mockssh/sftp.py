@@ -4,8 +4,10 @@ import os
 import paramiko
 from paramiko import SFTPAttributes
 
+from mockssh.decorators import returns_sftp_error
+
 __all__ = [
-    "SFTPServer",
+    'SFTPServerInterface',
 ]
 
 
@@ -24,25 +26,6 @@ class SFTPHandle(paramiko.SFTPHandle):
     @property
     def writefile(self):
         return self.file_obj
-
-
-def returns_sftp_error(func):
-
-    LOG = logging.getLogger(__name__)
-
-    def wrapped(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except OSError as err:
-            LOG.debug("Error calling %s(%s, %s): %s",
-                      func, args, kwargs, err, exc_info=True)
-            return SFTPServer.convert_errno(err.errno)
-        except Exception as err:
-            LOG.debug("Error calling %s(%s, %s): %s",
-                      func, args, kwargs, err, exc_info=True)
-            return paramiko.SFTP_FAILURE
-
-    return wrapped
 
 
 class SFTPServerInterface(paramiko.SFTPServerInterface):
@@ -106,12 +89,3 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
         path = self._path_join(path)
         st = os.stat(path)
         return paramiko.SFTPAttributes.from_stat(st, path)
-
-
-class SFTPServer(paramiko.SFTPServer):
-
-    def __init__(self, channel, name, server, sftp_si=SFTPServerInterface,
-                 *largs, **kwargs):
-        kwargs["sftp_si"] = SFTPServerInterface
-        super(SFTPServer, self).__init__(
-            channel, name, server, *largs, **kwargs)

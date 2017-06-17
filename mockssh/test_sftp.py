@@ -1,5 +1,7 @@
+import time
 import os
 import tempfile
+import threading
 
 import py.path
 from pytest import fixture, raises
@@ -10,6 +12,31 @@ def files_equal(fname1, fname2):
         with open(fname1, "rb") as f1, open(fname2, "rb") as f2:
             if f1.read() == f2.read():
                 return True
+
+
+def test_sftp_concurrent_connections(assert_num_threads, server):
+    def connect():
+        with server.client('sample-user') as client:
+            sftp = client.open_sftp()
+            for i in range(0, 3):
+                assert sftp.listdir() == []
+                time.sleep(0.2)
+            sftp.close()
+        time.sleep(0.1)
+
+    threads = []
+    for i in range(0, 5):
+        thread = threading.Thread(
+            target=connect, daemon=True, name='test-thread-%d' % i)
+        threads.append(thread)
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    time.sleep(0.1)
 
 
 def test_sftp_session(server):

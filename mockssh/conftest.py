@@ -1,5 +1,6 @@
 import logging
 import os
+import threading
 
 from pytest import fixture
 
@@ -37,3 +38,9 @@ def server(tmpdir):
 def client(server):
     with server.client('sample-user') as c:
         yield c
+
+
+@fixture
+def assert_num_threads():
+    yield
+    assert threading.active_count() == 1, threading.enumerate()
