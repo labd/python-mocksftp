@@ -1,6 +1,5 @@
 import logging
 import os
-from errno import EACCES, EDQUOT, ENOENT, ENOTDIR, EPERM, EROFS
 
 import paramiko
 from paramiko import SFTPAttributes
@@ -37,12 +36,7 @@ def returns_sftp_error(func):
         except OSError as err:
             LOG.debug("Error calling %s(%s, %s): %s",
                       func, args, kwargs, err, exc_info=True)
-            errno = err.errno
-            if errno in {EACCES, EDQUOT, EPERM, EROFS}:
-                return paramiko.SFTP_PERMISSION_DENIED
-            if errno in {ENOENT, ENOTDIR}:
-                return paramiko.SFTP_NO_SUCH_FILE
-            return paramiko.SFTP_FAILURE
+            return SFTPServer.convert_errno(err.errno)
         except Exception as err:
             LOG.debug("Error calling %s(%s, %s): %s",
                       func, args, kwargs, err, exc_info=True)
