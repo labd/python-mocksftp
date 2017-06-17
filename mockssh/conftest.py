@@ -9,6 +9,8 @@ __all__ = [
     "server",
 ]
 
+logging.basicConfig(level=logging.DEBUG,
+                    format="%(asctime)s %(threadName)s %(name)s %(message)s")
 
 SAMPLE_USER_KEY = os.path.join(os.path.dirname(__file__), "sample-user-key")
 
@@ -29,10 +31,6 @@ def server(tmpdir):
     }
     with Server(users, root=root) as s:
         yield s
-
-
-logging.basicConfig(level=logging.DEBUG,
-                    format="%(asctime)s %(threadName)s %(name)s %(message)s")
 
 
 @fixture
