@@ -12,3 +12,10 @@ coverage:
 
 lint:
 	flake8 src/ tests/
+
+
+release:
+	pip install twine wheel
+	rm -rf dist/* build/*
+	python setup.py sdist bdist_wheel
+	twine upload -s dist/*
