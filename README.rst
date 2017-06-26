@@ -1,3 +1,16 @@
+.. start-no-pypi
+
+.. image:: https://travis-ci.org/LabD/python-mocksft.svg?branch=master
+    :target: https://travis-ci.org/LabD/python-mocksftp
+
+.. image:: http://codecov.io/github/LabD/python-mocksftp/coverage.svg?branch=master
+    :target: http://codecov.io/github/LabD/python-mocksftp?branch=master
+
+.. image:: https://img.shields.io/pypi/v/python-mocksftp.svg
+    :target: https://pypi.python.org/pypi/python-mocksftp/
+
+.. end-no-pypi
+
 mocksftp - Easily test your sftp client code 
 ============================================
 
