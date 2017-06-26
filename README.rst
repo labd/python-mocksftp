@@ -8,6 +8,8 @@ History
 =======
 
 This project was started as a fork of https://github.com/carletes/mock-ssh-server
+created by Carlos Valiente.
+
 The SSH related code was removed to focus solely on the SFTP protocol.
 
 
