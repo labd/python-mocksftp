@@ -80,6 +80,13 @@ class Server(object):
         self._users[uid] = (private_key_path, k)
 
     def start(self):
+        # Initialize the socket before starting the thread. Otherwise there
+        # is a good chance for a race condition when resolving the port with
+        # the port attribute.
+        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._socket.bind((self.host, 0))
+        self._socket.listen(5)
+
         self._thread = threading.Thread(target=self._run)
         self._thread.setDaemon(True)
         self._thread.start()
@@ -89,9 +96,6 @@ class Server(object):
         self._thread.join()
 
     def _run(self):
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.bind((self.host, 0))
-        self._socket.listen(5)
 
         sock = self._socket
         while sock.fileno() > 0:
