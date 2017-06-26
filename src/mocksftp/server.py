@@ -80,7 +80,8 @@ class Server(object):
         self._users[uid] = (private_key_path, k)
 
     def start(self):
-        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread = threading.Thread(target=self._run)
+        self._thread.setDaemon(True)
         self._thread.start()
 
     def stop(self):

@@ -1,2 +1,18 @@
+# Exclude everything by default
+exclude *
+recursive-exclude * *
+
+include MANIFEST.in
+include CHANGES
 include LICENSE
-include requirements.txt
+include README.rst
+include setup.cfg
+include setup.py
+
+graft src
+graft src/mocksftp/keys/
+graft tests
+
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store

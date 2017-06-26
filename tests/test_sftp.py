@@ -26,8 +26,8 @@ def test_sftp_concurrent_connections(assert_num_threads, sftp_server):
 
     threads = []
     for i in range(0, 5):
-        thread = threading.Thread(
-            target=connect, daemon=True, name='test-thread-%d' % i)
+        thread = threading.Thread(target=connect, name='test-thread-%d' % i)
+        thread.setDaemon(True)
         threads.append(thread)
 
     for thread in threads:
