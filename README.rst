@@ -1,6 +1,6 @@
 .. start-no-pypi
 
-.. image:: https://travis-ci.org/LabD/python-mocksft.svg?branch=master
+.. image:: https://travis-ci.org/LabD/python-mocksftp.svg?branch=master
     :target: https://travis-ci.org/LabD/python-mocksftp
 
 .. image:: http://codecov.io/github/LabD/python-mocksftp/coverage.svg?branch=master
