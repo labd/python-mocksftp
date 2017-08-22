@@ -1,9 +1,11 @@
 import os
+import stat
 import tempfile
 import threading
 import time
 
 import py.path
+from paramiko import SFTPAttributes
 from pytest import fixture, raises
 
 
@@ -58,10 +60,7 @@ def test_sftp_session(sftp_server):
 
 @fixture(params=[("chmod", "/", 0o755),
                  ("chown", "/", 0, 0),
-                 ("lstat", "/"),
-                 ("readlink", "/etc"),
                  ("remove", "/etc/passwd"),
-                 ("rename", "/tmp/foo", "/tmp/bar"),
                  ("symlink", "/tmp/foo", "/tmp/bar"),
                  ("truncate", "/etc/passwd", 0),
                  ("unlink", "/etc/passwd"),
@@ -77,7 +76,8 @@ def test_sftp_unsupported_calls(sftp_server, unsupported_call):
             sftp = c.open_sftp()
             with raises(IOError) as exc:
                 getattr(sftp, meth)(*args)
-            assert str(exc.value) == "Operation unsupported"
+            assert str(exc.value) == "Operation unsupported", (
+                "{0}() should be unsupported".format(meth))
 
 
 def test_sftp_list_files(sftp_server, sftp_client):
@@ -109,7 +109,8 @@ def test_sftp_mkdir(sftp_server, sftp_client):
     sftp.mkdir('the-dir')
     assert sftp.listdir('.') == ['the-dir']
 
-    root_path.listdir() == ['the-dir']
+    files = [f.basename for f in root_path.listdir()]
+    assert files == ['the-dir']
 
 
 def test_sftp_rmdir(sftp_server, sftp_client):
@@ -121,3 +122,56 @@ def test_sftp_rmdir(sftp_server, sftp_client):
 
     sftp.rmdir('the-dir')
     assert sftp.listdir('.') == []
+
+
+def test_sftp_stat(sftp_server, sftp_client):
+    root_path = py.path.local(sftp_server.root)
+    root_path.join('file.txt').write('content')
+
+    sftp = sftp_client.open_sftp()
+    statobj = sftp.lstat('file.txt')  # type: SFTPAttributes
+
+    assert statobj.st_size == 7
+    assert stat.S_IMODE(statobj.st_mode) == 0o644
+    assert stat.S_IFMT(statobj.st_mode) == stat.S_IFREG  # regular file
+
+
+def test_sftp_lstat(sftp_server, sftp_client):
+    root_path = py.path.local(sftp_server.root)
+    root_path.join('file.txt').write('content')
+    root_path.join('symlink.txt').mksymlinkto('file.txt')
+
+    sftp = sftp_client.open_sftp()
+    statobj = sftp.lstat('symlink.txt')  # type: SFTPAttributes
+
+    assert statobj.st_size == 8  # symlink size!
+    assert stat.S_IFMT(statobj.st_mode) == stat.S_IFLNK  # symlink
+
+    sftp = sftp_client.open_sftp()
+    statobj = sftp.stat('symlink.txt')  # type: SFTPAttributes
+
+    # Apply default umask in testing modes,
+    # in case it's not set (e.g. docker container)
+    assert statobj.st_size == 7
+    assert stat.S_IMODE(statobj.st_mode) & ~0o022 == 0o644
+    assert stat.S_IFMT(statobj.st_mode) == stat.S_IFREG  # regular file
+
+
+def test_sftp_readlink(sftp_server, sftp_client):
+    root_path = py.path.local(sftp_server.root)
+    root_path.join('file.txt').write('content')
+    root_path.join('symlink.txt').mksymlinkto('file.txt')
+
+    sftp = sftp_client.open_sftp()
+    assert sftp.readlink('symlink.txt') == 'file.txt'
+
+
+def test_sftp_rename(sftp_server, sftp_client):
+    root_path = py.path.local(sftp_server.root)
+    root_path.join('file.txt').write('content')
+
+    sftp = sftp_client.open_sftp()
+    sftp.rename('file.txt', 'new.txt')
+
+    files = [f.basename for f in root_path.listdir()]
+    assert files == ['new.txt']

@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 
 import paramiko
 from paramiko import SFTPAttributes
@@ -36,9 +37,11 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
         self._root = kwargs.pop('root', None)
         super(SFTPServerInterface, self).__init__(server, *largs, **kwargs)
 
-    def _path_join(self, path):
-        return os.path.realpath(
-            os.path.join(self._root, os.path.normpath(path)))
+    def _path_join(self, path, follow_symlinks=True):
+        path = os.path.join(self._root, os.path.normpath(path))
+        if follow_symlinks:
+            path = os.path.realpath(path)
+        return path
 
     def session_started(self):
         pass
@@ -86,6 +89,28 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
 
     @returns_sftp_error
     def stat(self, path):
-        path = self._path_join(path)
+        path = self._path_join(path, follow_symlinks=False)
         st = os.stat(path)
         return paramiko.SFTPAttributes.from_stat(st, path)
+
+    @returns_sftp_error
+    def lstat(self, path):
+        path = self._path_join(path, follow_symlinks=False)
+        st = os.lstat(path)
+        return paramiko.SFTPAttributes.from_stat(st, path)
+
+    @returns_sftp_error
+    def rename(self, oldpath, newpath):
+        oldpath = self._path_join(oldpath, follow_symlinks=False)
+        newpath = self._path_join(newpath)
+        # By using shutil, the file can be copied between filesystems.
+        # This falls back to os.rename() for files at the same filesystem.
+        shutil.move(oldpath, newpath)
+        return paramiko.SFTP_OK
+
+    posix_rename = rename
+
+    @returns_sftp_error
+    def readlink(self, path):
+        path = self._path_join(path, follow_symlinks=False)
+        return os.readlink(path)
