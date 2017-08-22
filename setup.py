@@ -1,5 +1,7 @@
+#!/usr/bin/env python
+import codecs
 import re
-import glob
+import os
 
 from setuptools import find_packages, setup
 
@@ -20,17 +22,30 @@ tests_require = [
 ]
 
 
-with open('README.rst') as fh:
-    long_description = re.sub(
-        '^.. start-no-pypi.*^.. end-no-pypi', '', fh.read(), flags=re.M | re.S)
+def read(*parts):
+    file_path = os.path.join(os.path.dirname(__file__), *parts)
+    return codecs.open(file_path, encoding='utf-8').read()
 
+
+def find_version(*parts):
+    version_file = read(*parts)
+    version_match = re.search(
+        r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+    if version_match:
+        return str(version_match.group(1))
+    raise RuntimeError("Unable to find version string.")
+
+
+def strip_no_pypi(text):
+    return re.sub(
+        '^.. start-no-pypi.*^.. end-no-pypi', '', text, flags=re.M | re.S)
 
 
 setup(
     name="mocksftp",
-    version="0.1.0",
+    version=find_version('src', 'mocksftp', '__init__.py'),
     description="Mock SFTP server for testing purposes",
-    long_description=long_description,
+    long_description=strip_no_pypi(read('README.rst')),
     url="https://github.com/LabD/python-mocksftp",
     author="Michael van Tellingen",
     author_email="michaelvantellingen@gmail.com",
