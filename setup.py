@@ -31,7 +31,7 @@ setup(
     version="0.1.0",
     description="Mock SFTP server for testing purposes",
     long_description=long_description,
-    url="https://github.com/carletes/mock-ssh-server",
+    url="https://github.com/LabD/python-mocksftp",
     author="Michael van Tellingen",
     author_email="michaelvantellingen@gmail.com",
     license="MIT",

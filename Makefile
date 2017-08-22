@@ -7,6 +7,9 @@ install:
 test:
 	py.test
 
+retest:
+	py.test -vvs --lf
+
 coverage:
 	py.test --cov=mocksftp --cov-report=term-missing -p no:mocksftp
 
