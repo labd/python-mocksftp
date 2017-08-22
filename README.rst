@@ -53,5 +53,5 @@ The SSH related code was removed to focus solely on the SFTP protocol.
 Alternatives
 ============
 
- - https://github.com/ulope/pytest-sftpserver 
- - https://github.com/rspivak/sftpserver
+* https://github.com/ulope/pytest-sftpserver
+* https://github.com/rspivak/sftpserver
