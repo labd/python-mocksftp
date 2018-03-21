@@ -151,13 +151,23 @@ def test_sftp_rename(root_path, sftp_client):
     assert files == ['new.txt']
 
 
-def test_sftp_remove(root_path, sftp_client):
+def test_sftp_remove_file(root_path, sftp_client):
     root_path.join('file.txt').write('content')
 
     sftp = sftp_client.open_sftp()
     sftp.remove('file.txt')
 
     assert not root_path.join('file.txt').check()
+    assert len(root_path.listdir()) == 0
+
+
+def test_sftp_remove_folder(root_path, sftp_client):
+    root_path.join('subdir').mkdir()
+
+    sftp = sftp_client.open_sftp()
+    sftp.remove('subdir')
+
+    assert not root_path.join('subdir').check()
     assert len(root_path.listdir()) == 0
 
 

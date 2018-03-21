@@ -153,7 +153,10 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
     @returns_sftp_error
     def remove(self, path):
         path = self._path_join(path, follow_symlinks=False)
-        os.remove(path)
+        if os.path.isdir(path):
+            os.rmdir(path)
+        else:
+            os.remove(path)
         return paramiko.SFTP_OK
 
     @returns_sftp_error
