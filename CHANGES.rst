@@ -1,3 +1,10 @@
+Version 1.0 (2018-03-21)
+========================
+
+* Added ``remove()``, ``chmod()``, ``chown()``, ``symlink()``, ``utime()`` support.
+* Addded check to avoid breaking outside the SFTP server root.
+
+
 Version 0.2.0 (2017-08-22)
 ==========================
 
