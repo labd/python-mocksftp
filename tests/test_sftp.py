@@ -1,12 +1,16 @@
 import os
 import stat
-import tempfile
 import threading
 import time
 
 import py.path
 from paramiko import SFTPAttributes
 from pytest import fixture, raises
+
+
+@fixture
+def root_path(sftp_server):
+    return py.path.local(sftp_server.root)
 
 
 def files_equal(fname1, fname2):
@@ -41,20 +45,19 @@ def test_sftp_concurrent_connections(assert_num_threads, sftp_server):
     time.sleep(0.1)
 
 
-def test_sftp_session(sftp_server):
+def test_sftp_session(root_path, sftp_server):
     for uid in sftp_server.users:
-        target_dir = tempfile.mkdtemp()
-        target_fname = os.path.join(target_dir, "foo")
+        target_fname = str(root_path.join('foo.py'))
         assert not os.access(target_fname, os.F_OK)
 
         with sftp_server.client(uid) as c:
             sftp = c.open_sftp()
-            sftp.put(__file__, target_fname, confirm=True)
+            sftp.put(__file__, "foo.py", confirm=True)
             assert files_equal(target_fname, __file__)
 
-            second_copy = os.path.join(target_dir, "bar")
+            second_copy = str(root_path.join('bar.py'))
             assert not os.access(second_copy, os.F_OK)
-            sftp.get(target_fname, second_copy)
+            sftp.get("foo.py", second_copy)
             assert files_equal(target_fname, second_copy)
 
 
@@ -88,8 +91,7 @@ def test_sftp_list_files(sftp_server, sftp_client):
     assert sftp.listdir('.') == ['dummy.txt']
 
 
-def test_sftp_open_file(sftp_server, sftp_client):
-    root_path = py.path.local(sftp_server.root)
+def test_sftp_open_file(root_path, sftp_client):
     root_path.join('file.txt').write('content')
 
     sftp = sftp_client.open_sftp()
@@ -99,9 +101,7 @@ def test_sftp_open_file(sftp_server, sftp_client):
     assert data.read() == b'content'
 
 
-def test_sftp_mkdir(sftp_server, sftp_client):
-    root_path = py.path.local(sftp_server.root)
-
+def test_sftp_mkdir(root_path, sftp_client):
     sftp = sftp_client.open_sftp()
     assert sftp.listdir('.') == []
     sftp.mkdir('the-dir')
@@ -111,8 +111,7 @@ def test_sftp_mkdir(sftp_server, sftp_client):
     assert files == ['the-dir']
 
 
-def test_sftp_rmdir(sftp_server, sftp_client):
-    root_path = py.path.local(sftp_server.root)
+def test_sftp_rmdir(root_path, sftp_client):
     root_path.join('the-dir').mkdir()
 
     sftp = sftp_client.open_sftp()
@@ -122,8 +121,7 @@ def test_sftp_rmdir(sftp_server, sftp_client):
     assert sftp.listdir('.') == []
 
 
-def test_sftp_stat(sftp_server, sftp_client):
-    root_path = py.path.local(sftp_server.root)
+def test_sftp_stat(root_path, sftp_client):
     root_path.join('file.txt').write('content')
 
     sftp = sftp_client.open_sftp()
@@ -134,8 +132,7 @@ def test_sftp_stat(sftp_server, sftp_client):
     assert stat.S_IFMT(statobj.st_mode) == stat.S_IFREG  # regular file
 
 
-def test_sftp_lstat(sftp_server, sftp_client):
-    root_path = py.path.local(sftp_server.root)
+def test_sftp_lstat(root_path, sftp_client):
     root_path.join('file.txt').write('content')
     root_path.join('symlink.txt').mksymlinkto('file.txt')
 
@@ -155,8 +152,7 @@ def test_sftp_lstat(sftp_server, sftp_client):
     assert stat.S_IFMT(statobj.st_mode) == stat.S_IFREG  # regular file
 
 
-def test_sftp_readlink(sftp_server, sftp_client):
-    root_path = py.path.local(sftp_server.root)
+def test_sftp_readlink(root_path, sftp_client):
     root_path.join('file.txt').write('content')
     root_path.join('symlink.txt').mksymlinkto('file.txt')
 
@@ -164,8 +160,7 @@ def test_sftp_readlink(sftp_server, sftp_client):
     assert sftp.readlink('symlink.txt') == 'file.txt'
 
 
-def test_sftp_rename(sftp_server, sftp_client):
-    root_path = py.path.local(sftp_server.root)
+def test_sftp_rename(root_path, sftp_client):
     root_path.join('file.txt').write('content')
 
     sftp = sftp_client.open_sftp()
@@ -175,8 +170,7 @@ def test_sftp_rename(sftp_server, sftp_client):
     assert files == ['new.txt']
 
 
-def test_sftp_remove(sftp_server, sftp_client):
-    root_path = py.path.local(sftp_server.root)
+def test_sftp_remove(root_path, sftp_client):
     root_path.join('file.txt').write('content')
 
     sftp = sftp_client.open_sftp()
