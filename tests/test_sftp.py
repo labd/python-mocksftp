@@ -62,14 +62,14 @@ def test_sftp_session(root_path, sftp_server):
             assert files_equal(target_fname, second_copy)
 
 
-def test_sftp_list_files(sftp_server, sftp_client):
+def test_sftp_list_files(root_path, sftp_client):
     sftp = sftp_client.open_sftp()
     assert sftp.listdir('.') == []
 
-    with open(os.path.join(sftp_server.root, 'dummy.txt'), 'w') as fh:
-        fh.write('dummy-content')
-
-    assert sftp.listdir('.') == ['dummy.txt']
+    root_path.join('dummy.txt').write('dummy-content')
+    root_path.join('subdir/foobar.txt').write('dummy2', ensure=True)
+    assert sorted(sftp.listdir('.')) == ['dummy.txt', 'subdir']
+    assert sftp.listdir('subdir') == ['foobar.txt']
 
 
 def test_sftp_open_file(root_path, sftp_client):
@@ -208,7 +208,7 @@ def test_sftp_utime(root_path, sftp_client):
     assert stat.mtime == 0
 
 
-def test_sftp_symlink_block_outside(sftp_server, sftp_client):
+def test_sftp_symlink_block_outside(sftp_client):
     sftp = sftp_client.open_sftp()
 
     with raises(IOError) as exception_info:
