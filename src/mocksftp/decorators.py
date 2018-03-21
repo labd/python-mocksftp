@@ -16,7 +16,7 @@ def returns_sftp_error(func):
                 func, args, kwargs, err, exc_info=True)
             return paramiko.SFTPServer.convert_errno(err.errno)
         except Exception as err:
-            logger.debug(
+            logger.warning(
                 "Error calling %s(%s, %s): %s",
                 func, args, kwargs, err, exc_info=True)
             return paramiko.SFTP_FAILURE
