@@ -4,6 +4,7 @@ import shutil
 
 import errno
 import paramiko
+import sys
 from paramiko import SFTPAttributes
 
 from mocksftp.decorators import returns_sftp_error
@@ -92,6 +93,36 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
         return SFTPHandle(os.fdopen(fd, mode), flags)
 
     @returns_sftp_error
+    def chattr(self, path, attr):
+        path = self._path_join(path, follow_symlinks=False)
+        if attr.st_size is not None:
+            if sys.version_info[0] >= 3:
+                os.truncate(path, attr.st_size)
+            else:
+                fd = os.open(path, os.O_RDWR)
+                try:
+                    os.ftruncate(fd, attr.st_size)
+                finally:
+                    os.close(fd)
+
+        if attr.st_uid is not None or attr.st_gid is not None:
+            if attr.st_uid is None or attr.st_gid is None:
+                return paramiko.SFTP_BAD_MESSAGE  # both must be given
+
+            os.chown(path, attr.st_uid, attr.st_gid)
+
+        if attr.st_mode is not None:
+            os.chmod(path, attr.st_mode)
+
+        if attr.st_atime is not None or attr.st_mtime is not None:
+            if attr.st_atime is None or attr.st_mtime is None:
+                return paramiko.SFTP_BAD_MESSAGE  # both must be given
+
+            os.utime(path, (attr.st_atime, attr.st_mtime))
+
+        return paramiko.SFTP_OK
+
+    @returns_sftp_error
     def stat(self, path):
         path = self._path_join(path, follow_symlinks=False)
         st = os.stat(path)
@@ -123,4 +154,11 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
     def remove(self, path):
         path = self._path_join(path, follow_symlinks=False)
         os.remove(path)
+        return paramiko.SFTP_OK
+
+    @returns_sftp_error
+    def symlink(self, target_path, path):
+        self._path_join(target_path)  # only to check root level.
+        path = self._path_join(path, follow_symlinks=False)
+        os.symlink(target_path, path)
         return paramiko.SFTP_OK

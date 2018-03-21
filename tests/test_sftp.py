@@ -62,26 +62,6 @@ def test_sftp_session(root_path, sftp_server):
             assert files_equal(target_fname, second_copy)
 
 
-@fixture(params=[("chmod", "/", 0o755),
-                 ("chown", "/", 0, 0),
-                 ("symlink", "/tmp/foo", "/tmp/bar"),
-                 ("truncate", "/etc/passwd", 0),
-                 ("utime", "/", (0, 0))])
-def unsupported_call(request):
-    return request.param
-
-
-def test_sftp_unsupported_calls(sftp_server, unsupported_call):
-    for uid in sftp_server.users:
-        with sftp_server.client(uid) as c:
-            meth, args = unsupported_call[0], unsupported_call[1:]
-            sftp = c.open_sftp()
-            with raises(IOError) as exc:
-                getattr(sftp, meth)(*args)
-            assert str(exc.value) == "Operation unsupported", (
-                "{0}() should be unsupported".format(meth))
-
-
 def test_sftp_list_files(sftp_server, sftp_client):
     sftp = sftp_client.open_sftp()
     assert sftp.listdir('.') == []
@@ -179,6 +159,65 @@ def test_sftp_remove(root_path, sftp_client):
 
     assert not root_path.join('file.txt').check()
     assert len(root_path.listdir()) == 0
+
+
+def test_sftp_symlink(root_path, sftp_client):
+    root_path.join('file.txt').write('content')
+
+    sftp = sftp_client.open_sftp()
+    sftp.symlink('file.txt', 'link.txt')
+
+    assert root_path.join('link.txt').readlink() == 'file.txt'
+
+
+def test_sftp_chmod(root_path, sftp_client):
+    file = root_path.join('file.txt')
+    file.write('content')
+
+    sftp = sftp_client.open_sftp()
+    sftp.chmod('file.txt', 0o647)
+    assert file.stat().mode == 0o100647
+
+
+def test_sftp_chown(root_path, sftp_client):
+    file = root_path.join('file.txt')
+    file.write('content')
+    st = os.stat(str(file))
+
+    sftp = sftp_client.open_sftp()
+    sftp.chown('file.txt', st.st_uid, st.st_gid)
+
+
+def test_sftp_truncate(root_path, sftp_client):
+    file = root_path.join('file.txt')
+    file.write('content')
+    sftp = sftp_client.open_sftp()
+    sftp.truncate('file.txt', 1)
+    assert file.read() == 'c'
+
+
+def test_sftp_utime(root_path, sftp_client):
+    file = root_path.join('file.txt')
+    file.write('content')
+
+    sftp = sftp_client.open_sftp()
+    sftp.utime('file.txt', (10, 0))
+
+    stat = file.stat()
+    assert stat.atime == 10
+    assert stat.mtime == 0
+
+
+def test_sftp_symlink_block_outside(sftp_server, sftp_client):
+    sftp = sftp_client.open_sftp()
+
+    with raises(IOError) as exception_info:
+        sftp.symlink(
+            '../../../../../../../../../../../../../etc/passwd',
+            'link.txt'
+        )
+
+    assert exception_info.value.errno == errno.EACCES
 
 
 def test_sftp_block_outside_root(sftp_client):
