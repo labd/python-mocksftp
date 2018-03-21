@@ -3,6 +3,7 @@ import stat
 import threading
 import time
 
+import errno
 import py.path
 from paramiko import SFTPAttributes
 from pytest import fixture, raises
@@ -178,3 +179,15 @@ def test_sftp_remove(root_path, sftp_client):
 
     assert not root_path.join('file.txt').check()
     assert len(root_path.listdir()) == 0
+
+
+def test_sftp_block_outside_root(sftp_client):
+    sftp = sftp_client.open_sftp()
+
+    with raises(IOError) as exception_info:
+        assert sftp.listdir('..')
+    assert exception_info.value.errno == errno.EACCES
+
+    with raises(IOError) as exception_info:
+        data = sftp.open('../file.txt', 'r')
+    assert exception_info.value.errno == errno.EACCES

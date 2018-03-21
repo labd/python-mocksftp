@@ -2,6 +2,7 @@ import logging
 import os
 import shutil
 
+import errno
 import paramiko
 from paramiko import SFTPAttributes
 
@@ -38,7 +39,10 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
         super(SFTPServerInterface, self).__init__(server, *largs, **kwargs)
 
     def _path_join(self, path, follow_symlinks=True):
-        path = os.path.join(self._root, os.path.normpath(path))
+        path = os.path.normpath(os.path.join(self._root, path))
+        if not path.startswith(self._root):
+            raise OSError(errno.EACCES, "No access outside root", path)
+
         if follow_symlinks:
             path = os.path.realpath(path)
         return path
