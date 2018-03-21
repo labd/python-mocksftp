@@ -114,3 +114,9 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
     def readlink(self, path):
         path = self._path_join(path, follow_symlinks=False)
         return os.readlink(path)
+
+    @returns_sftp_error
+    def remove(self, path):
+        path = self._path_join(path, follow_symlinks=False)
+        os.remove(path)
+        return paramiko.SFTP_OK

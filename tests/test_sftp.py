@@ -60,10 +60,8 @@ def test_sftp_session(sftp_server):
 
 @fixture(params=[("chmod", "/", 0o755),
                  ("chown", "/", 0, 0),
-                 ("remove", "/etc/passwd"),
                  ("symlink", "/tmp/foo", "/tmp/bar"),
                  ("truncate", "/etc/passwd", 0),
-                 ("unlink", "/etc/passwd"),
                  ("utime", "/", (0, 0))])
 def unsupported_call(request):
     return request.param
@@ -175,3 +173,14 @@ def test_sftp_rename(sftp_server, sftp_client):
 
     files = [f.basename for f in root_path.listdir()]
     assert files == ['new.txt']
+
+
+def test_sftp_remove(sftp_server, sftp_client):
+    root_path = py.path.local(sftp_server.root)
+    root_path.join('file.txt').write('content')
+
+    sftp = sftp_client.open_sftp()
+    sftp.remove('file.txt')
+
+    assert not root_path.join('file.txt').check()
+    assert len(root_path.listdir()) == 0
