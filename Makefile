@@ -14,7 +14,8 @@ coverage:
 	py.test --cov=mocksftp --cov-report=term-missing -p no:mocksftp
 
 lint:
-	flake8 src/ tests/
+	ruff format --check src tests
+	ruff check src tests
 
 
 release:
