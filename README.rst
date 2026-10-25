@@ -1,7 +1,7 @@
 .. start-no-pypi
 
-.. image:: https://travis-ci.org/LabD/python-mocksftp.svg?branch=master
-    :target: https://travis-ci.org/LabD/python-mocksftp
+.. image:: https://github.com/labd/python-mocksftp/actions/workflows/python-tests.yml/badge.svg
+    :target: https://github.com/labd/python-mocksftp/actions/workflows/python-tests.yml
 
 .. image:: https://img.shields.io/pypi/v/mocksftp.svg
     :target: https://pypi.python.org/pypi/mocksftp/
