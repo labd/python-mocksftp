@@ -16,12 +16,11 @@ except ImportError:
 
 
 __all__ = [
-    'Server',
+    "Server",
 ]
 
 
 class Handler(paramiko.ServerInterface):
-
     log = logging.getLogger(__name__)
 
     def __init__(self, server):
@@ -49,7 +48,6 @@ class Handler(paramiko.ServerInterface):
 
 
 class Server(object):
-
     host = "127.0.0.1"
 
     log = logging.getLogger(__name__)
@@ -66,7 +64,7 @@ class Server(object):
 
         users = users or {}
         for uid, credentials in users.items():
-            self.add_user(uid, credentials['key'], credentials['passphrase'])
+            self.add_user(uid, credentials["key"], credentials["passphrase"])
 
     def __enter__(self):
         self.start()
@@ -133,10 +131,11 @@ class Server(object):
         transport = paramiko.Transport(conn)
         transport.add_server_key(paramiko.RSAKey(filename=keys.SERVER_PRIVATE_KEY))
         transport.set_subsystem_handler(
-            'sftp',
+            "sftp",
             paramiko.SFTPServer,
             root=self._root,
-            sftp_si=interface.SFTPServerInterface)
+            sftp_si=interface.SFTPServerInterface,
+        )
 
         transport.start_server(server=server)
         with self._lock:
@@ -159,7 +158,8 @@ class Server(object):
             username=uid,
             key_filename=private_key_path,
             allow_agent=False,
-            look_for_keys=False)
+            look_for_keys=False,
+        )
 
         with client:
             yield client

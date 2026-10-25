@@ -1,21 +1,20 @@
+import errno
 import logging
 import os
 import shutil
-
-import errno
-import paramiko
 import sys
+
+import paramiko
 from paramiko import SFTPAttributes
 
 from mocksftp.decorators import returns_sftp_error
 
 __all__ = [
-    'SFTPServerInterface',
+    "SFTPServerInterface",
 ]
 
 
 class SFTPHandle(paramiko.SFTPHandle):
-
     log = logging.getLogger(__name__)
 
     def __init__(self, file_obj, flags=0):
@@ -32,11 +31,10 @@ class SFTPHandle(paramiko.SFTPHandle):
 
 
 class SFTPServerInterface(paramiko.SFTPServerInterface):
-
     log = logging.getLogger(__name__)
 
     def __init__(self, server, *largs, **kwargs):
-        self._root = kwargs.pop('root', None)
+        self._root = kwargs.pop("root", None)
         super(SFTPServerInterface, self).__init__(server, *largs, **kwargs)
 
     def _path_join(self, path, follow_symlinks=True):

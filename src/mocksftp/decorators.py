@@ -12,18 +12,18 @@ def returns_sftp_error(func):
             return func(*args, **kwargs)
         except OSError as err:
             logger.debug(
-                "Error calling %s(%s, %s): %s",
-                func, args, kwargs, err, exc_info=True)
+                "Error calling %s(%s, %s): %s", func, args, kwargs, err, exc_info=True
+            )
             return paramiko.SFTPServer.convert_errno(err.errno)
         except AttributeError as err:
             logger.warning(
-                "Error calling %s(%s, %s): %s",
-                func, args, kwargs, err, exc_info=True)
+                "Error calling %s(%s, %s): %s", func, args, kwargs, err, exc_info=True
+            )
             return paramiko.SFTP_OP_UNSUPPORTED
         except Exception as err:
             logger.warning(
-                "Error calling %s(%s, %s): %s",
-                func, args, kwargs, err, exc_info=True)
+                "Error calling %s(%s, %s): %s", func, args, kwargs, err, exc_info=True
+            )
             return paramiko.SFTP_FAILURE
 
     return wrapped
