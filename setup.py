@@ -15,10 +15,7 @@ tests_require = [
     'pytest==9.0.3',
 
     # Linting
-    'isort==4.2.5',
-    'flake8==3.2.1',
-    'flake8-blind-except==0.1.1',
-    'flake8-debugger==1.4.0',
+    'ruff',
 ]
 
 
