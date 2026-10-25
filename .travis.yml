@@ -20,18 +20,11 @@ cache:
   directories:
     - $HOME/.cache/pip
 
-deps:
-  - codecov
-
 install:
-  - pip install -U pip tox codecov
+  - pip install -U pip tox
 
 script:
   - tox -e $TOXENV
-
-after_success:
-  - tox -e coverage-report
-  - codecov
 
 notifications:
   email: false
