@@ -2,7 +2,6 @@ import errno
 import logging
 import os
 import shutil
-import sys
 
 import paramiko
 from paramiko import SFTPAttributes
@@ -94,14 +93,7 @@ class SFTPServerInterface(paramiko.SFTPServerInterface):
     def chattr(self, path, attr):
         path = self._path_join(path, follow_symlinks=False)
         if attr.st_size is not None:
-            if sys.version_info[0] >= 3:
-                os.truncate(path, attr.st_size)
-            else:
-                fd = os.open(path, os.O_RDWR)
-                try:
-                    os.ftruncate(fd, attr.st_size)
-                finally:
-                    os.close(fd)
+            os.truncate(path, attr.st_size)
 
         if attr.st_uid is not None or attr.st_gid is not None:
             if attr.st_uid is None or attr.st_gid is None:
