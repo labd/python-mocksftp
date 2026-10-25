@@ -12,7 +12,7 @@ install_requires = [
 tests_require = [
     'pretend==1.0.8',
     'pytest-cov==2.4.0',
-    'pytest==3.0.6',
+    'pytest==9.0.3',
 
     # Linting
     'isort==4.2.5',
@@ -62,6 +62,7 @@ setup(
     entry_points={
         'pytest11': ['mocksftp = mocksftp.pytest_plugin']
     },
+    python_requires='>=3.10',
     install_requires=install_requires,
     tests_require=tests_require,
     extras_require={
