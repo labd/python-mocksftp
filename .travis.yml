@@ -4,8 +4,14 @@ language: python
 
 matrix:
   include:
-    - python: "3.10"
-      env: TOXENV=py310
+    - python: "3.11"
+      env: TOXENV=py311
+    - python: "3.12"
+      env: TOXENV=py312
+    - python: "3.13"
+      env: TOXENV=py313
+    - python: "3.14"
+      env: TOXENV=py314
 
 before_cache:
   - rm -rf $HOME/.cache/pip/log

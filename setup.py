@@ -62,7 +62,7 @@ setup(
     entry_points={
         'pytest11': ['mocksftp = mocksftp.pytest_plugin']
     },
-    python_requires='>=3.10',
+    python_requires='>=3.11',
     install_requires=install_requires,
     tests_require=tests_require,
     extras_require={
