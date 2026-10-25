@@ -12,6 +12,8 @@ matrix:
       env: TOXENV=py313
     - python: "3.14"
       env: TOXENV=py314
+    - python: "3.13"
+      env: TOXENV=lint
 
 before_cache:
   - rm -rf $HOME/.cache/pip/log
