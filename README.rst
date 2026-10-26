@@ -1,15 +1,13 @@
-.. start-no-pypi
+mocksftp - Easily test your sftp client code
+============================================
+
+.. image:: https://img.shields.io/pypi/v/mocksftp
+    :target: https://pypi.org/project/mocksftp/
+    :alt: PyPI
 
 .. image:: https://github.com/labd/python-mocksftp/actions/workflows/python-tests.yml/badge.svg
     :target: https://github.com/labd/python-mocksftp/actions/workflows/python-tests.yml
-
-.. image:: https://img.shields.io/pypi/v/mocksftp.svg
-    :target: https://pypi.python.org/pypi/mocksftp/
-
-.. end-no-pypi
-
-mocksftp - Easily test your sftp client code 
-============================================
+    :alt: Python Tests
 
 In-process SFTP server for testing your SFTP related client code.
 
