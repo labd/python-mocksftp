@@ -9,34 +9,36 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.14"
+      - name: Check formatting
+        run: uv run --frozen ruff format --check src tests
+      - name: Lint
+        run: uv run --frozen ruff check src tests
+
   test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - python-version: "3.11"
-            tox_env: py311
-          - python-version: "3.12"
-            tox_env: py312
-          - python-version: "3.13"
-            tox_env: py313
-          - python-version: "3.14"
-            tox_env: py314
-          - python-version: "3.13"
-            tox_env: lint
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           python-version: ${{ matrix.python-version }}
-          enable-cache: false
-
-      - name: Test with tox
-        run: uvx --with tox-uv tox -e "$TOX_ENV"
-        env:
-          TOX_ENV: ${{ matrix.tox_env }}
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Test with pytest
+        run: |
+          uv run --frozen coverage run -m pytest
+          uv run --frozen coverage report
