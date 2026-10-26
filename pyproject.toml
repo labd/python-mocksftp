@@ -35,22 +35,17 @@ mocksftp = "mocksftp.pytest_plugin"
 [dependency-groups]
 dev = [{ include-group = "test" }]
 test = [
-  "coverage[toml]>=7.17.0",
+  "coverage[toml]>=7.16.2",
   "pretend>=1.0.9",
   "pytest>=9.1.1",
   "pytest-cov>=7.1.0",
-  "ruff>=0.17.2",
+  "ruff>=0.17.0",
 ]
 
 [tool.uv]
 # supply-chain: only resolve releases at least 14 days old; use
 # exclude-newer-package for urgent security fixes
 exclude-newer = "14 days"
-
-[tool.uv.exclude-newer-package]
-# Locked versions newer than the 14-day cutoff; remove after 2026-11-09
-coverage = "2026-10-27T00:00:00Z"  # pyproject requires >=7.17.0
-ruff = "2026-10-27T00:00:00Z"  # pyproject requires >=0.17.2
 
 [tool.hatch.version]
 path = "src/mocksftp/__init__.py"
