@@ -1,25 +1,22 @@
-.PHONY: test install
+.PHONY: install test retest coverage lint format
 
 
 install:
-	pip install -e .[test]
+	uv sync
 
 test:
-	py.test
+	uv run pytest
 
 retest:
-	py.test -vvs --lf
+	uv run pytest -vvs --lf
 
 coverage:
-	py.test --cov=mocksftp --cov-report=term-missing -p no:mocksftp
+	uv run pytest --cov=mocksftp --cov-report=term-missing -p no:mocksftp
 
 lint:
-	ruff format --check src tests
-	ruff check src tests
+	uv run ruff format --check src tests
+	uv run ruff check src tests
 
-
-release:
-	pip install twine wheel
-	rm -rf dist/* build/*
-	python setup.py sdist bdist_wheel
-	twine upload -s dist/*
+format:
+	uv run ruff check --fix src tests
+	uv run ruff format src tests

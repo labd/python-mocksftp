@@ -1,3 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mocksftp"
+dynamic = ["version"]
+description = "Mock SFTP server for testing purposes"
+readme = "README.rst"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Michael van Tellingen", email = "michaelvantellingen@gmail.com" },
+]
+requires-python = ">=3.11"
+classifiers = [
+  "Intended Audience :: Developers",
+  "Framework :: Pytest",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+dependencies = ["paramiko"]
+
+[project.urls]
+Homepage = "https://github.com/labd/python-mocksftp"
+Changelog = "https://github.com/labd/python-mocksftp/blob/master/CHANGES.rst"
+
+[project.entry-points.pytest11]
+mocksftp = "mocksftp.pytest_plugin"
+
+[dependency-groups]
+dev = [{ include-group = "test" }]
+test = [
+  "coverage[toml]>=7.17.0",
+  "pretend>=1.0.9",
+  "pytest>=9.1.1",
+  "pytest-cov>=7.1.0",
+  "ruff>=0.17.2",
+]
+
+[tool.hatch.version]
+path = "src/mocksftp/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mocksftp"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.rst", "CHANGES.rst", "LICENSE"]
+
+[tool.pytest.ini_options]
+minversion = "3.0"
+strict = true
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["mocksftp"]
+
+[tool.coverage.paths]
+source = ["src/mocksftp", ".venv/lib/python*/site-packages/mocksftp"]
+
+[tool.coverage.report]
+show_missing = true
+
 [tool.ruff]
 line-length = 88
 
