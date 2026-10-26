@@ -164,11 +164,13 @@ CI (``.github/workflows/python-tests.yml``) runs ``ruff format --check`` and
 Release process
 ===============
 
-1. Bump ``__version__`` in ``src/mocksftp/__init__.py``. Hatch reads the
-   version from there.
-2. Add an entry to ``CHANGES.rst``.
-3. Create a GitHub release. The ``Release to PyPi`` workflow builds the package
-   with ``uv build`` and publishes it to PyPI with trusted publishing (OIDC).
+Releases are managed with `changie <https://changie.dev>`_:
+
+1. Add a changelog entry to your pull request with ``changie new``.
+2. After merging to ``master``, a release pull request is opened (or updated)
+   automatically, with the new version and the updated ``CHANGELOG.md``.
+3. Merging the release pull request creates the GitHub release, which publishes
+   the package to PyPI.
 
 
 History
