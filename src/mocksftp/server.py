@@ -86,7 +86,7 @@ class Server(object):
         self._socket.listen(5)
 
         self._thread = threading.Thread(target=self._run)
-        self._thread.setDaemon(True)
+        self._thread.daemon = True
         self._thread.start()
 
     def stop(self):
