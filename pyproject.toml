@@ -27,7 +27,7 @@ dependencies = ["paramiko"]
 
 [project.urls]
 Homepage = "https://github.com/labd/python-mocksftp"
-Changelog = "https://github.com/labd/python-mocksftp/blob/master/CHANGES.rst"
+Changelog = "https://github.com/labd/python-mocksftp/blob/master/CHANGELOG.md"
 
 [project.entry-points.pytest11]
 mocksftp = "mocksftp.pytest_plugin"
@@ -54,7 +54,7 @@ path = "src/mocksftp/__init__.py"
 packages = ["src/mocksftp"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src", "tests", "README.rst", "CHANGES.rst", "LICENSE"]
+include = ["src", "tests", "README.rst", "CHANGELOG.md", "CHANGES.rst", "LICENSE"]
 
 [tool.pytest.ini_options]
 minversion = "3.0"
